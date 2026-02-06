@@ -17,7 +17,7 @@ const apiTokenInput = document.getElementById("api-token");
 const statusElement = document.getElementById("status"); // optional status label for model loading
 
 // logic for event logging
-const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbwFj-ucritkbpHDriuh9ifM2luuSGNFHiiJzpeWQXKx5om_lXBdNND15czhdhDdc_Ry/exec";
+const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9GzSPhbJKa8jRQq7NCLFKHDyi0hyrgIyMYJq9B62uZ0h5qDkXL0dMObZuyrDgDK4s/exec";
 
 async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
   const payload = {
@@ -40,7 +40,7 @@ async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
   fetch(LOGGING_ENDPOINT, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "text/plain"
     },
     body: JSON.stringify(payload)
   }).catch((err) => {

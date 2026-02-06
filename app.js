@@ -16,6 +16,40 @@ const errorElement = document.getElementById("error-message");
 const apiTokenInput = document.getElementById("api-token");
 const statusElement = document.getElementById("status"); // optional status label for model loading
 
+// logic for event logging
+const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbwFj-ucritkbpHDriuh9ifM2luuSGNFHiiJzpeWQXKx5om_lXBdNND15czhdhDdc_Ry/exec";
+
+async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
+  const payload = {
+    review,
+    sentiment: {
+      label: sentimentLabel,
+      confidence
+    },
+    meta: {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      timestamp_client: new Date().toISOString(),
+      model: "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
+      app: "sentiment-analysis-github-pages"
+    }
+  };
+
+  // Fire-and-forget logging
+  fetch(LOGGING_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  }).catch((err) => {
+    console.warn("Logging failed:", err);
+  });
+}
+
+
+
 // Initialize the app
 document.addEventListener("DOMContentLoaded", function () {
   // Load the TSV file (Papa Parse)
@@ -205,6 +239,13 @@ function displaySentiment(result) {
         <i class="fas ${getSentimentIcon(sentiment)} icon"></i>
         <span>${label} (${(score * 100).toFixed(1)}% confidence)</span>
     `;
+
+  // log to google sheets
+  logAnalysisEvent({
+    review: reviewText.textContent,
+    sentimentLabel: label,
+    confidence: score
+  });
 }
 
 // Get appropriate icon for sentiment bucket

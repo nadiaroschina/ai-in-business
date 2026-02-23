@@ -18,9 +18,9 @@ const statusElement = document.getElementById("status"); // optional status labe
 const actionResult = document.getElementById("action-result");
 
 // logic for event logging
-const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9GzSPhbJKa8jRQq7NCLFKHDyi0hyrgIyMYJq9B62uZ0h5qDkXL0dMObZuyrDgDK4s/exec";
+const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbxEgPokGZ7h2Yvs0RkK9MkzL2989tGCfPuUyuVeYkJmA1Nhb_ZFEFgmUyNPvS9ivQQr/exec";
 
-async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
+async function logAnalysisEvent({ review, sentimentLabel, confidence, actionTaken }) {
   const payload = {
     review,
     sentiment: {
@@ -34,8 +34,8 @@ async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
       timestamp_client: new Date().toISOString(),
       model: "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
       app: "sentiment-analysis-github-pages",
-      action_taken: decision.actionCode
-    }
+    },
+    action_taken: actionTaken
   };
 
   // Fire-and-forget logging
@@ -278,7 +278,8 @@ function displaySentiment(result) {
   logAnalysisEvent({
     review: reviewText.textContent,
     sentimentLabel: label,
-    confidence: score
+    confidence: score,
+    actionTaken: decision.actionCode,
   });
 }
 

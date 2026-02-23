@@ -5,59 +5,39 @@ https://docs.google.com/spreadsheets/d/1Xaqm5eNIFRZVNP7EdBmw3V1o_ZpfO7kImVcXvFIt
 backend: sheet & script https://docs.google.com/spreadsheets/d/1Xaqm5eNIFRZVNP7EdBmw3V1o_ZpfO7kImVcXvFItnjA/edit?usp=sharing
 
 # prompt
-
-(a series of prompts in one conversation with chatgpt) https://chatgpt.com/share/6985aa5b-e00c-800f-8dd7-9894b9e19848
-
-key prompt snippets:
-
-1. decising on the architecture
 ```
-using the context of the two apps i have shown you, explain the easiest and most logical way to combine the logic of the two applications
+# context 
+i have built a browser-based sentiment analysis app that: 
+    * Selects a review (e.g., random sample) 
+    * Classifies it as POSITIVE or NEGATIVE 
+    * Displays confidence score
+    * Logs every inference event for analysis
+each click produces a logged, analyzable event stored in Google Sheets
+    
+Architecture: Static Frontend (GitHub Pages) + Client-side ML model (runs in browser) + Google Apps Script Web App (logging endpoint) + Google Sheets (event storage)
 
-key result:
+Execution Flow:
+    1. User clicks button 
+    2. Review is selected 
+    3. ML model runs inference in browser 
+    4. Sentiment + confidence displayed 
+    5. App sends **simple POST (text/plain)** to Apps Script 
+    6. doPost() parses JSON 
+    7. Row appended to Google Sheet. each row contains: * Server timestamp * Review text * Sentiment JSON * Meta JSON (device, model info, etc.) 
+    
+Your task is to implement an Automated Decision Logic that triggers specific business actions based on the AI's analysis.
 
-i want to obtain a web app with the interface exactly the same as in my sentiment analysis project, with the same logic on the ML side of it.
+business logic:
 
-for every "Analyze Random Review" button click, i want the backend logic for logging this event to a google sheets document  (i want four columns - Timestamp (ts_iso)
-Review (which is randomly selected)
-Sentiment (with confidence)
-Meta (this includes all information from the client))
+confidently negative review -- OFFER_COUPON (apology)
+neutral review or low confidence -- REQUEST_FEEDBACK (ask for more feedback)
+confidently positive review -- ASK_REFERRAL (offer to make a referral)
 
-instructions:
+# instructions steps:
+    * Step A: Logic Function Write a function determineBusinessAction(score, label) that returns the Action Code, UI Message, and Color.
+    * Step B: UI Update Modify your HTML/JS so that after the API responds, a new section (e.g., <div id="action-result">) appears displaying the correct message and style defined in your logic. 
+    * Step C: Enhanced Logging Update your Google Sheets App Script and Frontend code to send an extra column: Old Columns: timestamp, review, sentiment, confidence New Column: action_taken (e.g., "OFFER_COUPON")
 
-do not write any code yet, just explain the goal file structure and where and how it will be stored and ran
+# format:
+we will go step by step, starting from step a. i will send you the existing code and you will tell what to update and how to re-run my code.
 ```
-
-2. writing the code
-```
-ok, your recommended option B that seems very valid. 
-
-instructions:
-please provide 
-• the code needed in Code.gs on apps script side
-• the code changes in app.js on the gitpub pages side
-• the sequence of steps i need to perform to run my app
-```
-
-3. fixing access error
-
-```
-context:
-• i have understood the symptoms and now i want a quick fix
-
-instructions: 
-• tell me exactly what code lines to change
-• tell me the order of steps i should perform to check the behaviour
-```
-
-
-# existing apps
-
-existing sentiment analysis app (example from the lecture):
-ui: https://dryjins.github.io/aib/2026/l1/correct
-repo & prompt: https://github.com/dryjins/aib/tree/main/2026/l1/correct
-
-
-existing event logger app (build during the seminar):
-ui: https://script.google.com/macros/s/AKfycbx9G6NyGPD-8zoVSUetzGvjxHMGQ4TtyPu1ZZiliCnuFdAsXthOX50CfnmLPqD5EVsn4Q/exec
-sheet & script: https://docs.google.com/spreadsheets/d/1axwjKfNrFApvYmKGwCP3cavRn0FXqKqeTFGgydYlBrU/edit?usp=sharing

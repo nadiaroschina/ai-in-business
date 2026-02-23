@@ -15,6 +15,7 @@ const loadingElement = document.querySelector(".loading");
 const errorElement = document.getElementById("error-message");
 const apiTokenInput = document.getElementById("api-token");
 const statusElement = document.getElementById("status"); // optional status label for model loading
+const actionResult = document.getElementById("action-result");
 
 // logic for event logging
 const LOGGING_ENDPOINT = "https://script.google.com/macros/s/AKfycbz9GzSPhbJKa8jRQq7NCLFKHDyi0hyrgIyMYJq9B62uZ0h5qDkXL0dMObZuyrDgDK4s/exec";
@@ -47,7 +48,6 @@ async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
     console.warn("Logging failed:", err);
   });
 }
-
 
 
 // Initialize the app
@@ -240,6 +240,39 @@ function displaySentiment(result) {
         <span>${label} (${(score * 100).toFixed(1)}% confidence)</span>
     `;
 
+  // ===============================
+  // BUSINESS DECISION TRIGGER
+  // ===============================
+  const decision = determineBusinessAction(score, label);
+
+  // Update UI: Show action section
+  if (actionResult) {
+      actionResult.style.display = "block";
+      actionResult.style.border = `2px solid ${decision.color}`;
+      actionResult.style.padding = "15px";
+      actionResult.style.marginTop = "15px";
+      actionResult.style.borderRadius = "8px";
+
+      actionResult.innerHTML = `
+        <div style="color:${decision.color}; font-weight:bold; font-size:18px;">
+          ${decision.emoji} ${decision.uiMessage}
+        </div>
+        <button 
+          style="
+            margin-top:10px;
+            padding:8px 16px;
+            background:${decision.color};
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+          "
+        >
+          ${decision.actionCode}
+        </button>
+      `;
+    }
+
   // log to google sheets
   logAnalysisEvent({
     review: reviewText.textContent,
@@ -258,6 +291,50 @@ function getSentimentIcon(sentiment) {
     default:
       return "fa-question-circle";
   }
+}
+
+// Determine business action based on sentiment score and label
+function determineBusinessAction(score, label) {
+  let actionCode = "";
+  let uiMessage = "";
+  let color = "";
+  let emoji = "";
+
+  if (score >= 0.7 && score <= 1.0 && label === "NEGATIVE") {
+    actionCode = "OFFER_COUPON";
+    uiMessage = "We're really sorry about your experience. Please accept a 50% discount for your next purchase as an apology.";
+    color = "#e74c3c"; // red
+    emoji = "🚨";
+  }
+
+  else if (score >= 0.7 && score <= 1.0 && label === "POSITIVE") {
+    actionCode = "ASK_REFERRAL";
+    uiMessage = "We're thrilled you enjoyed it! Refer a friend and earn rewards.";
+    color = "#27ae60"; // green
+    emoji = "⭐";
+  }
+
+  else if (score < 0.4) {
+    actionCode = "REQUEST_FEEDBACK";
+    uiMessage = "We’d love to understand your experience better. Please complete our short survey.";
+    color = "#f39c12"; // orange
+    emoji = "📝";
+  }
+
+  else {
+    // fallback safety (important for production stability)
+    actionCode = "NO_ACTION";
+    uiMessage = "Thank you for your feedback.";
+    color = "#7f8c8d"; // gray
+    emoji = "ℹ️";
+  }
+
+  return {
+    actionCode,
+    uiMessage,
+    color,
+    emoji
+  };
 }
 
 // Show error message

@@ -33,7 +33,8 @@ async function logAnalysisEvent({ review, sentimentLabel, confidence }) {
       platform: navigator.platform,
       timestamp_client: new Date().toISOString(),
       model: "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
-      app: "sentiment-analysis-github-pages"
+      app: "sentiment-analysis-github-pages",
+      action_taken: decision.actionCode
     }
   };
 
